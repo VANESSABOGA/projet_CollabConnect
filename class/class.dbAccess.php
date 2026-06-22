@@ -97,7 +97,7 @@ class dbAccess
 
     function selectOBJ($sqlQuery)
     {
-          echo $sqlQuery.PHP_EOL;
+        //   echo $sqlQuery.PHP_EOL;
         try {
             $recipesStatement = $this->connexion->prepare($sqlQuery);
             $recipesStatement->execute();

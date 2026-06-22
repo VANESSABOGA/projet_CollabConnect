@@ -14,8 +14,6 @@ $canal = "USSD";
 $service = new Central($_REQUEST, $canal);
 
 $next = $service->getNext(0, true);
-print_r($next);
-
 
 #if($next!=null and $next->diff<60 and $next->next!='' and $_REQUEST['next']!="menu" and $next->sessionId==$brvm->sessionId()){
 
@@ -67,6 +65,5 @@ if (isset($next) && ($next) != null && $next->next != '' && $next != "menu") {
     }
 } else {
 
-    print_r("hhhhhhhhhhhhhhhhhhhh");
     $service->flowContinueMain();
 }
