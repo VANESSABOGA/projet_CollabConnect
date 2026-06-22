@@ -3,7 +3,7 @@
 
 class Message
 {
-    const CONTENU_INDISPONIBLE = "Desolé! Le contenu demandé est momentanement indisponible. Veuillez reéssayer plus tard. La radio Omega FM vous remercie!{CR}0: Retour{CR}00: Accueil";
+    const CONTENU_INDISPONIBLE = "Desole! Le contenu demande est momentanement indisponible. Veuillez reessayer plus tard. La radio Omega FM vous remercie!{CR}0: Retour{CR}00: Accueil";
     public $NISSA;
     public $rapport;
     public $projet;
@@ -45,7 +45,7 @@ class Message
 
         return new EtatLecture(
             1,
-            "{$service->libelle}{CR}Dans combien de temps souhaitez -vous que l'agent passe pour exécuter la tache ?",
+            "{$service->libelle}{CR}Dans combien de temps souhaitez -vous que l'agent passe pour executer la tache ?",
             "1. Dans 2 jours{CR}2. Dans 3 jours{CR}3. Dans 7 jours{CR}0. Retour{CR}00. Accueil"
         );
     }
@@ -54,7 +54,7 @@ class Message
     {
         return new EtatLecture(
             1,
-            "{$service->libelle}{CR}Dans combien de temps souhaitez -vous que l'agent passe pour exécuter la tache ?",
+            "{$service->libelle}{CR}Dans combien de temps souhaitez -vous que l'agent passe pour executer la tache ?",
             "1. Aujourd hui (Dans 1H){CR}2. Dans 3 jours{CR}3. Dans 7 jours{CR}0. Retour{CR}00. Accueil"
         );
     }
@@ -143,7 +143,7 @@ class Message
 
 
         $dateResevation = $this->formatDateRDV($dateRDV, $heure);
-        return new EtatLecture(1, $service->description . "Félicitation, votre rendez-vous de {$service->libelle} est pris en compte pour {$dateResevation}, un agent vous contactera bientôt. Merci pour la confiance!", "0. Retour{CR}00. Accueil");
+        return new EtatLecture(1, $service->description . "Felicitation, votre rendez-vous de {$service->libelle} est pris en compte pour {$dateResevation}, un agent vous contactera bientôt. Merci pour la confiance!", "0. Retour{CR}00. Accueil");
     }
 
     public function echecOperation(Service $service = NULL)
@@ -157,7 +157,7 @@ class Message
 
     public static function creditInsuffisant(Service $service)
     {
-        return new EtatLecture(1, "Désole ! Votre crédit est insuffisant pour effectuer cette opération. Vous devez disposer d'au moins {$service->montant}F", "00. Accueil");
+        return new EtatLecture(1, "Desole ! Votre credit est insuffisant pour effectuer cette operation. Vous devez disposer d'au moins {$service->montant}F", "00. Accueil");
     }
 
 
@@ -303,7 +303,7 @@ class Message
             $calc[1] = 3;
         }
         $this->rapport = $calc[0] . $calc[1] . " %";
-        return "Votre rapport de compatibilité romantique est de " . $calc[0] . $calc[1] . " % pour $nom1 et $nom2";
+        return "Votre rapport de compatibilite romantique est de " . $calc[0] . $calc[1] . " % pour $nom1 et $nom2";
     }
     public function resultatAstro($nom1, $nom2)
     {
@@ -388,7 +388,7 @@ class Message
             "09" => "Sept",
             "10" => "Oct",
             "11" => "Nov",
-            "12" => "Déc"
+            "12" => "Dec"
         ];
 
         $timestamp = strtotime($date);
@@ -405,7 +405,7 @@ class Message
 
             $heureFormat = date("G\\h", strtotime($heure));
 
-            $dateFormatee .= " à $heureFormat";
+            $dateFormatee .= " a $heureFormat";
         }
 
         return $dateFormatee;

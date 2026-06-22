@@ -45,8 +45,8 @@ class EtatLecture
         $this->title_white = str_replace("\n", "{CR}", $this->title);
         $this->contenu_white = str_replace("\r", "", $this->contenu);
         $this->contenu_white = str_replace("\n", "", $this->contenu);
-        $this->title_ascii = str_replace(array('é', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->title_white);
-        $this->contenu_ascii = str_replace(array('é', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->contenu_white);
+        $this->title_ascii = str_replace(array('e', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->title_white);
+        $this->contenu_ascii = str_replace(array('e', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->contenu_white);
 
         if (ENV_ACCENT) {
             $this->contenu_affiche = $this->contenu_white;
@@ -107,8 +107,8 @@ class EtatLecture
             $this->contenu_white = str_replace("\r", "", $this->contenu);
         if ($this->contenu != '')
             $this->contenu_white = str_replace("\n", "", $this->contenu);
-        $this->title_ascii = str_replace(array('é', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->title_white);
-        $this->contenu_ascii = str_replace(array('é', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->contenu_white);
+        $this->title_ascii = str_replace(array('e', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->title_white);
+        $this->contenu_ascii = str_replace(array('e', 'à', 'è', 'Ê', 'ê', 'ç'), array('e', 'a', 'e', 'E', 'e', 'c'), $this->contenu_white);
         if (ENV_ACCENT) {
             $this->contenu_affiche = $this->contenu_white;
             $this->title_affiche = $this->title_white;

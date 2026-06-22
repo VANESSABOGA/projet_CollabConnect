@@ -3,7 +3,7 @@
 class MenuServiceSpecialite
 {
     /**
-     * Retour menu formaté
+     * Retour menu formate
      */
     public function menuDebut($menu)
     {
@@ -15,7 +15,7 @@ class MenuServiceSpecialite
    
     
     /**
-     * Retourne un menu ou une entrée précise
+     * Retourne un menu ou une entree precise
      */
     public function menu2($menu,$tableauSpecialite, $plus = false)
     {
@@ -31,7 +31,7 @@ class MenuServiceSpecialite
             return $menus[$menu];
         }
 
-        // Retour entrée spécifique
+        // Retour entree specifique
         if (isset($menus[$menu][$plus])) {
             return $menus[$menu][$plus];
         }
@@ -40,7 +40,7 @@ class MenuServiceSpecialite
     }
 
     /**
-     * Génération texte USSD
+     * Generation texte USSD
      */
     public function getMenu($tableau, $page = 1, $taillePage = 4)
     {

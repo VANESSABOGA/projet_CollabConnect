@@ -24,7 +24,7 @@ class AirtelMoney
     }
 
     /**
-     * Récupération du token OAuth2
+     * Recuperation du token OAuth2
      */
 
     public function getAccessToken()
@@ -101,7 +101,7 @@ class AirtelMoney
     }
 
     /**
-     * Vérification du statut d'une transaction
+     * Verification du statut d'une transaction
      */
     public function checkTransaction($transactionId)
     {
@@ -132,7 +132,7 @@ class AirtelMoney
     }
 
     /**
-     * Fonction CURL générique
+     * Fonction CURL generique
      */
     private function request(
         $method,
@@ -184,7 +184,7 @@ class AirtelMoney
             // 🔥 FIX CRITIQUE AIRTEL
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 
-            // 🔐 SSL SAFE MODE (NE PAS DÉSACTIVER)
+            // 🔐 SSL SAFE MODE (NE PAS DeSACTIVER)
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
 
@@ -221,19 +221,19 @@ class AirtelMoney
     {
         switch ($status) {
             case 'TS':
-                return 'Paiement effectué avec succès';
+                return 'Paiement effectue avec succès';
 
             case 'TF':
-                return 'Paiement échoué';
+                return 'Paiement echoue';
 
             case 'TIP':
                 return 'Paiement en cours';
 
             case 'TA':
-                return 'Paiement ambigu - vérification requise';
+                return 'Paiement ambigu - verification requise';
 
             case 'TE':
-                return 'Paiement expiré';
+                return 'Paiement expire';
 
             default:
                 return 'Statut inconnu';

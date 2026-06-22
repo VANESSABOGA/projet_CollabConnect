@@ -10,25 +10,25 @@ class Ussd
                 
 
                 return "CON Bienvenue CollabConnect\n
-                1. Réserver
+                1. Reserver
                 2. Payer facture
-                3. Mes réservations";
+                3. Mes reservations";
             }
         }
 
         if ($text == "") {
 
             return "CON Bienvenue CollabConnect\n
-                1. Réserver
+                1. Reserver
                 2. Payer facture
-                3. Mes réservations";
+                3. Mes reservations";
         }
 
         if ($text == "1") {
 
             return "CON Choisir service\n
                 1. Repassage
-                2. Ménage
+                2. Menage
                 3. Conception";
 
         }

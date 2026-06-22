@@ -50,7 +50,7 @@ class dbAccess
             die($e->getMessage());
         }
 
-        // debug("connecté");
+        // debug("connecte");
         return $this->conn;
     }
 
@@ -252,17 +252,17 @@ class dbAccess
 
     public static function estEntier($valeur, $type = 0)
     {
-        // option regex stricte si demandé
+        // option regex stricte si demande
         if ($type == 1) {
             return is_string($valeur) && preg_match('/^[0-9]+$/', $valeur);
         }
 
-        // déjà int natif
+        // dejà int natif
         if (is_int($valeur)) {
             return true;
         }
 
-        // sécurise type
+        // securise type
         if (!is_string($valeur) && !is_numeric($valeur)) {
             return false;
         }

@@ -12,7 +12,7 @@ class Service
     var $infos = null;
     var $actif = 1;
 
-    // Champs calculés / compatibles ancien système
+    // Champs calcules / compatibles ancien système
     var $level = null;
     var $url = null;
     var $node = null;
@@ -42,7 +42,7 @@ class Service
             $this->libelle = $this->nettoyerTexte($this->libelle);
             $this->description = $this->nettoyerTexte($this->description);
 
-            // Compatibilité anciens systèmes
+            // Compatibilite anciens systèmes
             $this->service = $this->libelle;
             $this->projet = $this->libelle;
             $this->id_projet = $this->code_service;
@@ -145,7 +145,7 @@ class Service
     }
 
     /**
-     * Vérifie si service actif
+     * Verifie si service actif
      */
     public function isActif()
     {
@@ -161,12 +161,12 @@ class Service
     }
 
     /**
-     * Durée lisible
+     * Duree lisible
      */
     public function getDuree()
     {
         if ($this->duree_estimee <= 0) {
-            return 'Non définie';
+            return 'Non definie';
         }
 
         return $this->duree_estimee . ' min';

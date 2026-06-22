@@ -68,7 +68,7 @@ class Central extends MENU
 
     public function menuErreurService()
     {
-        $pourAfficher = new EtatLecture(1, "desolé une erreur est survenue veuillez ressayer", "");
+        $pourAfficher = new EtatLecture(1, "desole une erreur est survenue veuillez ressayer", "");
         $this->setResponse($pourAfficher, $pourAfficher, "menu", "FB");
     }
 
@@ -90,6 +90,7 @@ class Central extends MENU
     {
 
         if ($code_service == NULL) {
+             
             $this->flowMenuPrincipal(0, 1);
         } else {
 
@@ -107,6 +108,7 @@ class Central extends MENU
                     $this->menuFinParcours();
                 }
             }
+            
         }
     }
 
@@ -856,7 +858,7 @@ class Central extends MENU
         $params = array($numeroClient, $this->telephone, $service->service_id, $service->montant, $designation, $reservation_id, $agent_id, $reference_facture);
         $status = $this->dbAcces->db_executeQuery($sqlQuery, $params);
 
-        $pourAfficher = new EtatLecture(1, "Felicitaion ! La facture du client a bien été genéré. Vous receverer les détails via SMS", "0. Retour");
+        $pourAfficher = new EtatLecture(1, "Felicitaion ! La facture du client a bien ete genere. Vous receverer les details via SMS", "0. Retour");
 
         $montantFormate = number_format($service->montant, 0, ',', ' ');
         //$prixUnitaire = number_format($forfait->tarif, 0, ',', ' ');
@@ -937,6 +939,7 @@ class Central extends MENU
     {
         //$this->LOG(__FUNCTION__."  Executing Main menu rule");
         $etal = $this->getEtatLecture();
+        // print_r($etal); exit;
         $page = $etal->page;
         $id_groupement = $etal->id_consultation;
         $id_context = $etal->context;
@@ -972,6 +975,7 @@ class Central extends MENU
             default:
                 $pourAfficher = $this->menuUssd->menuGroupe($id_groupement, $page, $params);
                 if (dbAccess::estEntier($this->content, 1)) {
+                   
                     $ideff = $this->retourneIdEffectifR($this->content, "select id_menu from menus_ussd where precedent=$id_groupement and is_active='1' $params order by position ASC");
 
                     if ($ideff == null)
@@ -1047,7 +1051,7 @@ class Central extends MENU
 
                         $facture = $this->retourneFacture(" and f.reference = '" . $id . "'");
                         if ($facture != null) {
-                            $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total à payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
+                            $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total a payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
                             $this->setResponse(__FUNCTION__, $pourAfficher, "confirmerFacture_{$facture->reference}");
                         } else {
                             $pourAfficher = new EtatLecture(1, "Desole, cette facture n'existe pas{CR}Entrer le numero de la facture : ", "0.Retour");
@@ -1082,7 +1086,7 @@ class Central extends MENU
 
                     break;
                 default:
-                    $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total à payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
+                    $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total a payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
                     $this->setResponse(__FUNCTION__, $pourAfficher, "confirmerFacture_{$facture->reference}");
                     break;
             }
@@ -1102,7 +1106,7 @@ class Central extends MENU
 
             switch ($this->content) {
                 case 0:
-                    $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total à payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
+                    $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total a payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
                     $this->setResponse(__FUNCTION__, $pourAfficher, "confirmerFacture_{$facture->reference}");
                     break;
 

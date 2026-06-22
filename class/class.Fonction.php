@@ -32,7 +32,7 @@ class Fonction extends Request
 
         $result = $this->dbAcces->select($find);
         if ($result != null) {
-            //$this->logger->handler(__class__.'.'.__function__, "erreur lors de la vérification du statut du numéro");
+            //$this->logger->handler(__class__.'.'.__function__, "erreur lors de la verification du statut du numero");
             return new Next($result[0]);
         } else {
             $array['id'] = "";
@@ -287,7 +287,7 @@ class Fonction extends Request
     }
 
 
-    //function qui envoie les messages aux abonnés :::::::::::::::::::::
+    //function qui envoie les messages aux abonnes :::::::::::::::::::::
     public function sms_envoi($telephone, $message, $type = null, $sender = null, $type2 = "MT")
     {
         $message = str_replace('{CR}', PHP_EOL, $message);
@@ -318,7 +318,7 @@ class Fonction extends Request
 
         // $to_log = "date = " . @date('Y-m-d H:i:s') . " | telephone = " . $telephone . " | message = " . $message . " | sender = $sender | smsci = $smpp |  resultat  ==> " . $reply . " | url call =>" . $url;
         // //@file_put_contents("/var/www/html/MoovKiosqueService/SERVICES_STK/classes/logs/envoi_sms/log_" . @date('Y-m-d') . '.log', $to_log . PHP_EOL, FILE_APPEND);
-        // #echo "message : $message\nmessage envoyé à $telephone\n";
+        // #echo "message : $message\nmessage envoye à $telephone\n";
         // return $reply;
     }
 
@@ -460,7 +460,7 @@ class Fonction extends Request
             // return $req = $this->queryUpdate("next_table", $updateData, $clauseWhere);
             // return false;
         } else {
-            debug("iiiiiiiiiiiii");
+            // debug("iiiiiiiiiiiii");
             $maintenant = @date("Y-m-d H:i:s");
             $InsertData = array($this->telephone);
             $element = " numero, date , ";

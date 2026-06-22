@@ -14,13 +14,13 @@ $canal = "USSD";
 $service = new Central($_REQUEST, $canal);
 
 $next = $service->getNext(0, true);
-// print_r($next);
+print_r($next);
 
 
 #if($next!=null and $next->diff<60 and $next->next!='' and $_REQUEST['next']!="menu" and $next->sessionId==$brvm->sessionId()){
 
-if (isset($next) && ($next) != null && $next->diff < 60 && $next->next != '' && $next != "menu") {
-
+// if (isset($next) && ($next) != null && $next->diff < 60 && $next->next != '' && $next != "menu") {
+if (isset($next) && ($next) != null && $next->next != '' && $next != "menu") {
     $next = $next->next;
     // $next = $next ?? '';
 
@@ -66,5 +66,7 @@ if (isset($next) && ($next) != null && $next->diff < 60 && $next->next != '' && 
         $service->flowContinueMain();
     }
 } else {
+
+    print_r("hhhhhhhhhhhhhhhhhhhh");
     $service->flowContinueMain();
 }

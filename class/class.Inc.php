@@ -74,7 +74,7 @@ class Inc
 
     static function dateDiff($date1, $date2)
     {
-        $diff = abs($date1 - $date2); // abs pour avoir la valeur absolute, ainsi éviter d'avoir une différence négative
+        $diff = abs($date1 - $date2); // abs pour avoir la valeur absolute, ainsi eviter d'avoir une difference negative
         $retour = array();
 
         $tmp = $diff;

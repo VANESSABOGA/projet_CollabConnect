@@ -36,5 +36,5 @@ $reference = $reservation->create($payload);
 echo json_encode(array(
     'status' => 'SUCCESS',
     'reference' => $reference,
-    'message' => 'Réservation enregistrée'
+    'message' => 'Reservation enregistree'
 ));

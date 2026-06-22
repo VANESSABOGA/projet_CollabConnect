@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 28 mai 2026 à 22:22
+-- Genere le : jeu. 28 mai 2026 à 22:22
 -- Version du serveur : 8.4.3
 -- Version de PHP : 8.1.10
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `services_collabconnect`
+-- Base de donnees : `services_collabconnect`
 --
 
 -- --------------------------------------------------------
@@ -76,7 +76,7 @@ CREATE TABLE `factures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table `factures`
+-- Dechargement des donnees de la table `factures`
 --
 
 INSERT INTO `factures` (`facture_id`, `reservation_id`, `reference`, `numero_client`, `montant`, `statut`, `etat`, `date_facture`, `numero_agent`, `agent_id`, `id_service`, `designation`) VALUES
@@ -110,7 +110,7 @@ CREATE TABLE `forfait` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `forfait`
+-- Dechargement des donnees de la table `forfait`
 --
 
 INSERT INTO `forfait` (`id`, `souscription`, `keyword`, `periode`, `tarif`, `souscription_aff`, `affichage`, `id_service`, `transaction_code`, `is_active`) VALUES
@@ -138,14 +138,14 @@ CREATE TABLE `menus_ussd` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
--- Déchargement des données de la table `menus_ussd`
+-- Dechargement des donnees de la table `menus_ussd`
 --
 
 INSERT INTO `menus_ussd` (`id_menu`, `libelle`, `precedent`, `title`, `position`, `is_active`, `langue`, `abonnement`) VALUES
 (1, 'Reservation', 0, NULL, 1, 1, 'FR', 'NO'),
 (2, 'Generer Facture', 0, NULL, 2, 1, 'FR', 'NO'),
 (3, 'Repassage', 1, NULL, 1, 1, 'FR', 'NO'),
-(4, 'Pack Ménage', 1, NULL, 2, 1, 'FR', 'NO'),
+(4, 'Pack Menage', 1, NULL, 2, 1, 'FR', 'NO'),
 (5, 'Conception Affiche', 1, NULL, 3, 1, 'FR', 'NO'),
 (6, 'Electricite', 1, NULL, 4, 1, 'FR', 'NO'),
 (7, 'Dev Informatique', 1, NULL, 5, 1, 'FR', 'NO'),
@@ -171,7 +171,7 @@ CREATE TABLE `next_table` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
--- Déchargement des données de la table `next_table`
+-- Dechargement des donnees de la table `next_table`
 --
 
 INSERT INTO `next_table` (`id`, `next`, `date`, `numero`, `next_ext`, `url`, `env`, `sessionId`, `next_sms`, `date_sms`) VALUES
@@ -197,7 +197,7 @@ CREATE TABLE `paiements` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table `paiements`
+-- Dechargement des donnees de la table `paiements`
 --
 
 INSERT INTO `paiements` (`paiement_id`, `reservation_id`, `transaction_id`, `montant`, `operateur`, `statut`, `raw_response`, `date_paiement`) VALUES
@@ -226,7 +226,7 @@ CREATE TABLE `reservations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table `reservations`
+-- Dechargement des donnees de la table `reservations`
 --
 
 INSERT INTO `reservations` (`reservation_id`, `reference`, `client_nom`, `telephone`, `service_id`, `agent_id`, `date_rdv`, `specialite`, `description`, `statut`, `montant`, `paiement_statut`, `date_creation`) VALUES
@@ -265,14 +265,14 @@ CREATE TABLE `services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table `services`
+-- Dechargement des donnees de la table `services`
 --
 
 INSERT INTO `services` (`service_id`, `libelle`, `keyword`, `description`, `infos`, `precedent`, `montant`, `duree_estimee`, `code_service`, `specialite`, `external`, `url_central`, `actif`) VALUES
 (1, 'Electricite', 'electricite', NULL, NULL, '1', NULL, NULL, 6, 'OUI', NULL, NULL, 1),
 (2, 'Dev Informatique', 'informatique', NULL, NULL, '1', NULL, NULL, 7, 'NO', NULL, NULL, 1),
 (3, 'Repassage', 'repassage', NULL, NULL, '1', NULL, NULL, 3, 'NO', NULL, NULL, 1),
-(4, 'Pack Ménage', 'menage', 'Pack Ménage', 'La facturation du menage se fait par piece, une piece de 9mettre carre coute 5000 Frs', '1', NULL, NULL, 4, 'NO', NULL, NULL, 1),
+(4, 'Pack Menage', 'menage', 'Pack Menage', 'La facturation du menage se fait par piece, une piece de 9mettre carre coute 5000 Frs', '1', NULL, NULL, 4, 'NO', NULL, NULL, 1),
 (5, 'Conception Affiche', 'affiche', NULL, 'Vous recevrez un lien par SMS pour remplir le formulaire de la demande de conception de visuel. ', '1', NULL, NULL, 5, 'NO', NULL, NULL, 1);
 
 -- --------------------------------------------------------
@@ -301,7 +301,7 @@ CREATE TABLE `utilisateurs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Index pour les tables déchargées
+-- Index pour les tables dechargees
 --
 
 --
@@ -371,7 +371,7 @@ ALTER TABLE `utilisateurs`
   ADD UNIQUE KEY `unique_telephone` (`telephone`);
 
 --
--- AUTO_INCREMENT pour les tables déchargées
+-- AUTO_INCREMENT pour les tables dechargees
 --
 
 --
