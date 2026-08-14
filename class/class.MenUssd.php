@@ -51,9 +51,9 @@ class MenUssd
         $res->title = $title;
         $res->context = $groupement;
         if ($id_groupe != 0) $res->contenu .= "{CR}0. Retour";
-        else{
-            print_r($res);
-        }
+        // else{
+        //     // print_r($res);
+        // }
         $res->rechargement();
         return $res;
     }

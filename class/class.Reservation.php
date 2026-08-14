@@ -63,6 +63,20 @@ class Reservation
         $status = $this->db->db_executeQuery($sqlQuery, $insertData);
     }
 
+    public function getReservations($champ, $data)
+    {
+        //`description`, `infos`, `precedent`, `montant`, `duree_estimee`, `code_service`, `specialite`
+        $sqlQuery = "  SELECT r.*, s.libelle , s.`description`, s.`infos`, s.`precedent`, s.`montant`, s.`duree_estimee`, s.`code_service`, s.`specialite`
+        FROM reservations r   LEFT JOIN services s ON s.service_id = r.service_id
+        WHERE r.$champ = '$data'  ";
+
+        // echo $sqlQuery;
+        if ($resultat = $this->db->select($sqlQuery)) {
+            return $resultat;
+        } else
+            return null;
+    }
+
     public function details($reference)
     {
         $sqlQuery = "  SELECT r.*, s.libelle
@@ -99,30 +113,24 @@ class Reservation
         );
 
         $status = $this->db->db_executeQuery($sqlQuery, $params);
+        // return $status;
+
+        return array("return" => $status, "data" => $data);
+    }
+
+    public function UpdateReservation($data)
+    {
+        $sqlQuery = " UPDATE reservations SET statut = ?, paiement_statut = ? , paiement_id = ? , montant = ? WHERE reference = ? ";
+        $params = array($data['statut'], $data['paiement_statut'], $data['paiement_id'], $data['montant'], $data['reference']);
+        $status = $this->db->db_executeQuery($sqlQuery, $params);
         return $status;
     }
 
-     public function insertPaiement($reservation_id, $transaction_id, $montant, $status, $raw, $operateur)
+    public function DeleteReservation($reference)
     {
-        $sqlQuery = " INSERT INTO paiements(
-            reservation_id,
-            transaction_id,
-            montant,
-            operateur,
-            statut,
-            raw_response,
-            date_paiement
-        ) VALUES( ?,?,?,?,?,?, NOW() ) ";
-
-        $insertData = array(
-            $reservation_id,
-            $transaction_id,
-            $montant,
-            $operateur,
-            $status,
-            $raw
-        );
-        $status = $this->db->db_executeQuery($sqlQuery, $insertData);
+        $sqlQuery = " DELETE FROM reservations WHERE reference = ? ";
+        $params = array($reference);
+        $status = $this->db->db_executeQuery($sqlQuery, $params);
         return $status;
     }
 }

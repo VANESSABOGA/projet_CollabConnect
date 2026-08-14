@@ -23,6 +23,8 @@ class Central extends MENU
     public $tableauSpecialite = null;
     public $agent = null;
 
+    public $airtel_api_facturation = null;
+
 
     function __construct($request, $canal)
     {
@@ -34,6 +36,8 @@ class Central extends MENU
         $this->fonction = new Fonction($request, $canal, $this->link);
         $this->menuUssd = new MenUssd($this->link);
         $this->menuSpecialite = new MenuServiceSpecialite();
+
+        $this->airtel_api_facturation = new AirtelMoney($this->link);
 
         $this->agent = $this->fonction->retourneAgent();
 
@@ -90,7 +94,7 @@ class Central extends MENU
     {
 
         if ($code_service == NULL) {
-             
+
             $this->flowMenuPrincipal(0, 1);
         } else {
 
@@ -108,7 +112,6 @@ class Central extends MENU
                     $this->menuFinParcours();
                 }
             }
-            
         }
     }
 
@@ -310,8 +313,11 @@ class Central extends MENU
                     break;
                 case '1':
 
-                    $pourAfficher = $this->messager->libelleInviteAM($service, TARIF_RESERVATION);
-                    $this->setResponse($pourAfficher, $pourAfficher, "menuInviteAM_" . $service->code_service . "_{$delai}_{$choix}");
+                    // $pourAfficher = $this->messager->libelleInviteAM($service, TARIF_RESERVATION);
+                    // $this->setResponse($pourAfficher, $pourAfficher, "menuInviteAM_" . $service->code_service . "_{$delai}_{$choix}");
+
+
+                    $this->facturaturationReservation($service, $delai, $choix);
 
                     break;
                 default:
@@ -506,83 +512,7 @@ class Central extends MENU
     }
 
 
-    public function getFacturationService(Service $service, $delai, $choix)
-    {
 
-        $service->montant = TARIF_RESERVATION;
-        $codePin = trim($this->content);
-        $autentification = $this->getAuthentification($codePin, $service);
-        if ($autentification == true) {
-            $ref_reservation = $this->generateReference($service);
-
-
-            $delai = str_replace('J', '', $delai);
-            $delai = str_replace('H', '', $delai);
-
-            $heure = "09:00";
-
-            if ($delai == "24") {
-                $hh = 10;
-                if ($hh <= 16) {
-                    $date_rdv = date('Y-m-d');
-                    $heure = date('H:i', strtotime("+1 hours"));
-                } else {
-                    $delai = "1";
-                    $date_rdv = date('Y-m-d', strtotime("+$delai days"));
-                }
-            } else {
-                $date_rdv = date('Y-m-d', strtotime("+$delai days"));
-            }
-
-
-            if ($service->specialite == "OUI") {
-                $tableauSpecialite = $this->tableauSpecialite[$service->keyword]["$choix"];
-                $keywordSpecialite = $tableauSpecialite["keyword"];
-                $codeSpecialite = $tableauSpecialite["code_service"];
-            } else {
-                $keywordSpecialite = null;
-                $codeSpecialite = null;
-            }
-
-            $reservation = new Reservation($this->link);
-            $data = array(
-                'reference' => $ref_reservation,
-                'client_nom' => "client n." . $this->telephone,
-                'telephone' => $this->telephone,
-                'service_id' => $service->service_id,
-                'service_libelle' => $service->libelle,
-                'montant' => $service->montant,
-                'delai' => $delai,
-                'choix' => $choix,
-                'paiement_statut' => 1,
-                'statut' => 1,
-                'date_rdv' => $date_rdv,
-                'specialite' => $codeSpecialite,
-                'description' => $keywordSpecialite,
-                'code_pin' => $codePin
-            );
-
-            $reservation_id = $reservation->InsertReservation($data);
-
-            $transaction_id = "1";
-            $status_paie = '1';
-            $raw_response = "SUCCESS";
-            $operateur = "AIRTEL";
-            $paiement_id = $reservation->insertPaiement($reservation_id, $transaction_id, $service->montant, $status_paie, $raw_response, $operateur);
-
-            $pourAfficher = $this->messager->libelleReservationOK($service, $delai, $date_rdv, $heure);
-
-            $this->setResponse(__FUNCTION__, $pourAfficher, "menu");
-        } else {
-            $pourAfficher = $this->messager->creditInsuffisant($service);
-            $this->setResponse(__FUNCTION__, $pourAfficher, "menu", "FB");
-        }
-    }
-
-    public function getAuthentification($codePin, Service $service)
-    {
-        return true;
-    }
 
     public function getMenuInvitGenererFacture()
     {
@@ -939,7 +869,6 @@ class Central extends MENU
     {
         //$this->LOG(__FUNCTION__."  Executing Main menu rule");
         $etal = $this->getEtatLecture();
-        // print_r($etal); exit;
         $page = $etal->page;
         $id_groupement = $etal->id_consultation;
         $id_context = $etal->context;
@@ -975,7 +904,7 @@ class Central extends MENU
             default:
                 $pourAfficher = $this->menuUssd->menuGroupe($id_groupement, $page, $params);
                 if (dbAccess::estEntier($this->content, 1)) {
-                   
+
                     $ideff = $this->retourneIdEffectifR($this->content, "select id_menu from menus_ussd where precedent=$id_groupement and is_active='1' $params order by position ASC");
 
                     if ($ideff == null)
@@ -1081,9 +1010,9 @@ class Central extends MENU
                 case 1:
 
                     $montant = number_format($facture->montant, 0, '', '');
-                    $pourAfficher = new EtatLecture(1, "Paiement de {$montant}F par AM, entrer le code PIN pour confirmer.", "0.Retour");
-                    $this->setResponse(__FUNCTION__, $pourAfficher, "paiementFacture_{$facture->reference}");
-
+                    // $pourAfficher = new EtatLecture(1, "Paiement de {$montant}F par AM, entrer le code PIN pour confirmer.", "0.Retour");
+                    // $this->setResponse(__FUNCTION__, $pourAfficher, "paiementFacture_{$facture->reference}");
+                    $this->getPaiementFactureService($reference, $facture);
                     break;
                 default:
                     $pourAfficher = new EtatLecture(1, "Facture Num: {$facture->reference}{CR}Service :{$facture->libelle}{CR}Total a payer : {$facture->montant} FCFA{CR}1. Proceder au paiement", "0.Retour");
@@ -1093,6 +1022,291 @@ class Central extends MENU
         } else {
             $this->menuErreur();
         }
+    }
+
+
+
+
+    public function getMenuInvitPayerFacture()
+    {
+
+        switch ($this->content) {
+            case '0':
+                $this->flowContinueMain();
+                break;
+            default:
+
+                $content = trim($this->content);
+                $result =  $this->retourneFacture(" AND  reference='" . $content . "'  ");
+                if ($result != null) {
+                    // $this->setResponse($result, $result, "invit_payer_facture");
+                } else {
+                    $pourAfficher = new EtatLecture(1, "Desole, cette facture n'existe pas{CR}Entrer le numero de la facture : ", "0.Retour");
+                    $this->setResponse(__FUNCTION__, $pourAfficher, "payerFacture");
+                }
+                break;
+        }
+    }
+
+    public function getFacturationService(Service $service, $delai, $choix)
+    {
+
+        $service->montant = TARIF_RESERVATION;
+        $codePin = trim($this->content);
+        $autentification = $this->getAuthentification($codePin, $service);
+        if ($autentification == true) {
+            $ref_reservation = $this->generateReference($service);
+
+
+            $delai = str_replace('J', '', $delai);
+            $delai = str_replace('H', '', $delai);
+
+            $heure = "09:00";
+
+            if ($delai == "24") {
+                $hh = 10;
+                if ($hh <= 16) {
+                    $date_rdv = date('Y-m-d');
+                    $heure = date('H:i', strtotime("+1 hours"));
+                } else {
+                    $delai = "1";
+                    $date_rdv = date('Y-m-d', strtotime("+$delai days"));
+                }
+            } else {
+                $date_rdv = date('Y-m-d', strtotime("+$delai days"));
+            }
+
+
+            if ($service->specialite == "OUI") {
+                $tableauSpecialite = $this->tableauSpecialite[$service->keyword]["$choix"];
+                $keywordSpecialite = $tableauSpecialite["keyword"];
+                $codeSpecialite = $tableauSpecialite["code_service"];
+            } else {
+                $keywordSpecialite = null;
+                $codeSpecialite = null;
+            }
+
+            $reservation = new Reservation($this->link);
+            $data = array(
+                'reference' => $ref_reservation,
+                'client_nom' => "client n." . $this->telephone,
+                'telephone' => $this->telephone,
+                'service_id' => $service->service_id,
+                'service_libelle' => $service->libelle,
+                'montant' => $service->montant,
+                'delai' => $delai,
+                'choix' => $choix,
+                'paiement_statut' => 1,
+                'statut' => 1,
+                'date_rdv' => $date_rdv,
+                'specialite' => $codeSpecialite,
+                'description' => $keywordSpecialite,
+                'code_pin' => $codePin
+            );
+
+            $result_reservation_id = $reservation->InsertReservation($data);
+
+
+            $reservation_id = $result_reservation_id['status'];
+            $dataReservations = $result_reservation_id['data'];
+
+            $date_rdv = $dataReservations['date_rdv'];
+            $heure = $dataReservations['heure'];
+
+            $transaction_id = "1";
+            $status_paie = '1';
+            $raw_response = "SUCCESS";
+            $operateur = "AIRTEL";
+            $paiement_id = $this->insertPaiement($reservation_id, $transaction_id, $service->montant, $status_paie, $raw_response, $operateur);
+
+            $pourAfficher = $this->messager->libelleReservationOK($service, $delai, $date_rdv, $heure);
+
+            $this->setResponse(__FUNCTION__, $pourAfficher, "menu");
+        } else {
+            $pourAfficher = $this->messager->creditInsuffisant($service);
+            $this->setResponse(__FUNCTION__, $pourAfficher, "menu", "FB");
+        }
+    }
+
+    public function getAuthentification($codePin, Service $service)
+    {
+        return true;
+    }
+
+    public function getFactureEnAttente() {}
+
+
+
+    public function getTraiterReservationService(Service $service, $delai, $choix, $ref_reservation, $codePin = null)
+    {
+        $delai = str_replace('J', '', $delai);
+        $delai = str_replace('H', '', $delai);
+
+        $heure = "09:00";
+
+        if ($delai == "24") {
+            $hh = 10;
+            if ($hh <= 16) {
+                $date_rdv = date('Y-m-d');
+                $heure = date('H:i', strtotime("+1 hours"));
+            } else {
+                $delai = "1";
+                $date_rdv = date('Y-m-d', strtotime("+$delai days"));
+            }
+        } else {
+            $date_rdv = date('Y-m-d', strtotime("+$delai days"));
+        }
+
+
+        if ($service->specialite == "OUI") {
+            $tableauSpecialite = $this->tableauSpecialite[$service->keyword]["$choix"];
+            $keywordSpecialite = $tableauSpecialite["keyword"];
+            $codeSpecialite = $tableauSpecialite["code_service"];
+        } else {
+            $keywordSpecialite = null;
+            $codeSpecialite = null;
+        }
+
+        $reservation = new Reservation($this->link);
+        $data = array(
+            'reference' => $ref_reservation,
+            'client_nom' => "client n." . $this->telephone,
+            'telephone' => $this->telephone,
+            'service_id' => $service->service_id,
+            'service_libelle' => $service->libelle,
+            'montant' => $service->montant,
+            'delai' => $delai,
+            'choix' => $choix,
+            'paiement_statut' => 1,
+            'statut' => 1,
+            'date_rdv' => $date_rdv,
+            'specialite' => $codeSpecialite,
+            'description' => $keywordSpecialite,
+            'code_pin' => $codePin
+        );
+
+        $reservation_id = $reservation->InsertReservation($data);
+        return $reservation_id;
+    }
+
+    public function facturaturationReservation(Service $service, $delai, $choix, $operation = "reservation")
+    {
+        //  
+
+        $msisdn = $this->soa;
+        $amount = TARIF_RESERVATION;
+        $service->montant = $amount;
+        $ref_reservation = $this->generateReference($service);
+        $heure = "09:00";
+        $provider = AIRTEL_MONEY;
+
+        $result_reservation_id = $this->getTraiterReservationService($service, $delai, $choix, $ref_reservation);
+        if ($result_reservation_id != null) {
+
+            $reference = "Paiement Reservation " . $ref_reservation;
+            $transactionId = "TXN" .  time();
+            $reservation_id = $result_reservation_id['return'];
+            $dataReservations = $result_reservation_id['data'];
+
+            $date_rdv = $dataReservations['date_rdv'];
+            // $heure = $dataReservations['heure'];
+
+            $retourFacturation = $this->airtel_api_facturation->airtelPayment($reference, $msisdn, $amount, $transactionId);
+            if ($retourFacturation['success'] == true) {
+
+                $resultStatuts = $retourFacturation['response']['status'];
+                $code = $resultStatuts['code'];
+                $resultTransaction = $retourFacturation['response']['data']['transaction'];
+
+                $transaction_id = $resultTransaction['id'];
+                $reference_facture = $resultTransaction['airtel_money_id'];
+                $airtel_money_id = $resultTransaction['airtel_money_id'];
+                $raw_response = $retourFacturation['raw_response'];
+                $status_transaction = $resultTransaction['status'];
+
+                $status_paie = $resultStatuts['message'];
+                $response_code = $resultStatuts['response_code'];
+                $result_code = $resultStatuts['result_code'];
+
+
+                $result = $this->airtel_api_facturation->getTransactionStatusLabel($status_transaction);
+
+                if ($status_transaction != "TS") {
+
+                    $paiement_id = null;
+                    $status_paie = $result['etat'];
+                    // $this->annulerReservation($reservation_id);
+
+                    $facturation_id = $this->airtel_api_facturation->saveTransaction($ref_reservation, $transaction_id, $airtel_money_id, $msisdn, $amount, $status_paie, $provider, $raw_response, $response_code, $result_code);
+
+                    $this->UpdateReservation($ref_reservation, $paiement_id, $status_paie, $amount, "0");
+                    $pourAfficher = $this->messager->creditInsuffisant($service);
+                    $this->setResponse(__FUNCTION__, $pourAfficher, "menu", "FB");
+                } else {
+
+
+                    $facturation_id = $this->airtel_api_facturation->saveTransaction($ref_reservation, $transaction_id, $airtel_money_id, $msisdn, $amount, $status_paie, $provider, $raw_response, $response_code, $result_code);
+                    $paiement_id = $this->insertPaiement($reservation_id, $facturation_id, $service->montant, $status_paie, $provider, $raw_response);
+                    $this->UpdateReservation($ref_reservation, $paiement_id, $status_paie, $amount);
+
+                    $pourAfficher = $this->messager->libelleReservationOK($service, $delai, $date_rdv, $heure);
+                    $this->setResponse(__FUNCTION__, $pourAfficher, "reservationOK_" . $reservation_id, "FC");
+                }
+            } else {
+                $pourAfficher = $this->messager->echecFacturation($service);
+                $this->setResponse(__FUNCTION__, $pourAfficher, "menu", "FB");
+            }
+        }
+    }
+
+
+
+    public function UpdateReservation($ref_reservation, $paiement_id, $status_paie, $montant, $statut = "2")
+    {
+        $reservation = new Reservation($this->link);
+
+        $dataUpdateReservation = array(
+            'paiement_id' => $paiement_id,
+            'paiement_statut' => $status_paie,
+            'statut' => $statut,
+            'montant' => $montant,
+            'reference' => $ref_reservation
+
+        );
+
+        $reservation->UpdateReservation($dataUpdateReservation);
+    }
+
+    public function annulerReservation($reservation_id)
+    {
+        $reservation = new Reservation($this->link);
+        $reservation->DeleteReservation($reservation_id);
+    }
+
+    public function insertPaiement($reservation_id, $transaction_id, $montant, $status, $operateur, $raw)
+    {
+        $sqlQuery = " INSERT INTO paiements(
+            reservation_id,
+            transaction_id,
+            montant,
+            operateur,
+            statut,
+            raw_response,
+            date_paiement
+        ) VALUES( ?,?,?,?,?,?, NOW() )  ON DUPLICATE KEY UPDATE date_paiement=VALUES(date_paiement) ";
+
+        $insertData = array(
+            $reservation_id,
+            $transaction_id,
+            $montant,
+            $operateur,
+            $status,
+            json_encode($raw)
+        );
+
+
+        $status = $this->dbAcces->db_executeQuery($sqlQuery, $insertData);
+        return $status;
     }
 
 
@@ -1127,29 +1341,108 @@ class Central extends MENU
         }
     }
 
-
-    public function getMenuInvitPayerFacture()
+    public function getPaiementFactureService($reference, $facture)
     {
 
-        switch ($this->content) {
-            case '0':
-                $this->flowContinueMain();
-                break;
-            default:
 
-                // print_r($this->content);
-                $content = trim($this->content);
-                $result =  $this->retourneFacture(" AND  reference='" . $content . "'  ");
-                if ($result != null) {
-                    // print_r($result);
-                    // $this->setResponse($result, $result, "invit_payer_facture");
-                } else {
-                    $pourAfficher = new EtatLecture(1, "Desole, cette facture n'existe pas{CR}Entrer le numero de la facture : ", "0.Retour");
-                    $this->setResponse(__FUNCTION__, $pourAfficher, "payerFacture");
-                }
-                break;
+        $reservation_id = $facture->reservation_id;
+
+        $reservation = new Reservation($this->link);
+
+        $resultReservation = $reservation->getReservations("reservation_id", $reservation_id);
+        if ($resultReservation != null) {
+            $resultReservation = $resultReservation[0];
+         
+            $this->paiementPushClientFacture($facture, $reservation_id);
+        } else {
+            // print "Reservation introuvable \n";
+            $this->paiementPushClientFacture($facture, $reservation_id);
+        }
+
+    }
+
+
+    public function paiementPushClientFacture($facture, $reservation_id)
+    {
+
+        $transactionId = "TXN" . time();
+        $provider = AIRTEL_MONEY;
+        $msisdn = $this->soa;
+
+        $amount = number_format($facture->montant, 0, '', '');
+        $reference = "Paiement facture - " . $facture->reference;
+        $facturation_id = $facture->facture_id;
+        $ref_reservation = $facture->reference;
+
+        $retourFacturation = $this->airtel_api_facturation->paymentPush($msisdn, $amount, $reference,  $transactionId);
+
+        $resultStatuts = $retourFacturation['response']['status'];
+        $raw_response = $retourFacturation['raw_response'];
+        $resultTransaction = $retourFacturation['response']['data']['transaction'];
+        $status_transaction = $resultTransaction['status'];
+
+        $airtel_money_id = $resultTransaction['id'];
+        $transaction_id = $resultTransaction['id'];
+
+        $result = $this->airtel_api_facturation->getTransactionStatusLabel($status_transaction);
+        $paiement_id = null;
+        $status_paie = $result['etat'];
+
+        $response_code = $resultStatuts['response_code'];
+        $result_code = $resultStatuts['result_code'];
+
+        // print_r($retourFacturation);
+        // print "------------- \n";
+        // print_r($resultStatuts);
+        // print "------------- \n";
+        // print_r($resultTransaction);
+
+        if ($retourFacturation['success'] == true) {
+            print "------------- \n";
+            print "facuration facture ok \n";
+            $facturation_id = $this->airtel_api_facturation->saveTransaction($ref_reservation, $transaction_id, $airtel_money_id, $msisdn, $amount, $status_paie, $provider, $raw_response, $response_code, $result_code);
+            $paiement_id = $this->insertPaiement($reservation_id, $facturation_id, $amount, $status_paie, $provider, $raw_response);
+            $this->UpdatePaiementFacture($ref_reservation, $paiement_id, $status_paie);
+
+
+            $notificationFactureClientOK =
+                "Paiement effectue avec succes{CR}Facture N. : {$facture->reference}" .
+                "{CR}Total : {$amount} FCFA" .
+                "{CR}Merci d'avoir notre utilise le service !";
+
+
+            $this->sms_envoi($msisdn, $notificationFactureClientOK, "FACTURE", "FACTURE");
+
+            $pourAfficher =  new EtatLecture(1, "Paiement effectue avec succes pour la facture N. {$facture->reference} , merci d'avoir notre utilise le service  !", "00. Accueil");
+            $this->setResponse(__FUNCTION__, $pourAfficher, "menu");
+        } else {
+            print "------------- \n";
+            print "facuration facture echoue \n";
+
+            $facturation_id = $this->airtel_api_facturation->saveTransaction($ref_reservation, $transaction_id, $airtel_money_id, $msisdn, $amount, $status_paie, $provider, $raw_response, $response_code, $result_code);
+            $this->UpdatePaiementFacture($ref_reservation, $paiement_id, $status_paie, "1", "echoue");
+
+            $pourAfficher =  new EtatLecture(1, "Desole, le paiement de la facture N. {$facture->reference}  a echoue , merci de ressayer  !", "00. Accueil");
+            $this->setResponse(__FUNCTION__, $pourAfficher, "menu");
         }
     }
 
-    public function getFactureEnAttente() {}
+
+
+    public function UpdatePaiementFacture($ref_reservation, $paiement_id, $status_paie, $etat = '2', $statut = "regle")
+    {
+
+        $sqlQuery = "UPDATE factures SET  statut = ?, etat = ? WHERE reference = ?";
+        $dataUpdate = array(
+            $statut,
+            $etat,
+            $ref_reservation
+        );
+
+        // print_r($dataUpdate);   
+        // print "------------- \n";
+        // print "UPDATE factures SET  statut = $statut, etat = $etat WHERE reference = $ref_reservation";
+        $status = $this->dbAcces->db_executeQuery($sqlQuery, $dataUpdate);
+        return $status;
+    }
 }

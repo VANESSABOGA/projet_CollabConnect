@@ -61,23 +61,6 @@ class Fonction extends Request
     }
 
 
-    public function retourneServiceK($keyword, $champ = null)
-    {
-        $keyword = addslashes($keyword);
-        if ($champ == NULL)
-            $champ = 'keyword';
-
-        //$champ = ($champ == null ? 'keyword' : 'ukeyword');
-        //$champ = ($champ == null ? 'keyword' : 'ukeyword');
-        $where = " $champ='$keyword' or $champ like '$keyword;%' or $champ like '%;$keyword;%' or $champ like '%;$keyword'  LIMIT 1";
-        $find = "*";
-        $sqlQuery = "SELECT " . $find . " FROM " . Config::TBL_SERVICES . " WHERE " . $where;
-        if ($ligne = $this->dbAcces->select($sqlQuery)) {
-            return new Service($ligne[0]);
-        } else
-            return null;
-    }
-
     public function retourneService($code_service, $champ = null, $table_service = "services")
     {
         $code_service = (int) $code_service;
@@ -196,95 +179,6 @@ class Fonction extends Request
         return $resultat;
     }
 
-
-    public function traceFacturationRubrique($amount, $type, $rubrique, $id_service, $service, $plateforme, $status, $telephone = null, $date = null)
-    {
-        if ($telephone == NULL)
-            $telephone = $this->soa;
-        $plateforme = $this->canal;
-
-        if ($date == null)
-            $date = @date("Y-m-d H:i:s");
-
-        $sqlQuery = " INSERT INTO  billinglist (`date`,`telephone`, `amount`, `returnCode`, `rubrique`, `plateforme`, `status`, `type`,`id_service`,`service`) VALUES (?,?,?,?,?,?,?,?,?,?)";
-        $insertData2 = array(
-            $date,
-            $telephone,
-            $amount,
-            $this->statut_factu,
-            $rubrique,
-            $plateforme,
-            $status,
-            $type,
-            $id_service,
-            $service
-        );
-        $status = $this->dbAcces->db_executeQuery($sqlQuery, $insertData2);
-        return $status;
-    }
-
-
-    public function facturationEffective($numero, Bundle $bundle, $transaction_code = null)
-    {
-        if ($numero == NULL)
-            $numero = $this->Request->soa;
-
-        $description = "revamp";
-        $description = "revamp-stk";
-        $amount = trim($bundle->tarif);
-        #$amount =1;
-        if ($transaction_code == null)
-            $transaction_code = $description;
-
-        #$transaction_code="GNT";
-        #$url = "http://localhost/togo.togocm.billing/charge.php?msisdn={msisdn}&amount=100&service=VotingHeroes&operation=debit&environment=prod";
-        #$url = "http://localhost:80/togo.togocom.billing/charge.php?msisdn=$numero&amount=$amount&service=$description&operation=debit&environment=prod";
-        $url = "http://localhost/togo.togocom.billingv2/charge.php?msisdn=$numero&amount=$amount&service=$transaction_code&environment=prod";
-        //echo $url;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $reply = trim(curl_exec($ch));
-        curl_close($ch);
-
-        #$this->statut_factu = json_encode($reply);
-        if ($reply == "CHARGING_SUCCESS") {
-
-            $this->statut_factu = "CHARGING_SUCCESS";
-            return true;
-        } else {
-            $this->statut_factu = "CHARGING_FAILED";
-            return false;
-        }
-    }
-
-    public function facturationEffectiveByNISSA($numero, $tarif, $transaction_code = null)
-    {
-
-        $amount = intval($tarif);
-        if ($transaction_code == null)
-            $transaction_code = "GNT";
-        $numero = urlencode("228" . substr($numero, -8));
-        $transaction_code = urlencode($transaction_code);
-
-        return true;
-        $url = "http://localhost/togo.togocom.billingv2/charge.php?msisdn=$numero&amount=$amount&service=$transaction_code&environment=prod";
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 5
-        ]);
-        $reply = curl_exec($ch);
-        print_r($reply);
-        if ($reply === false) {
-            curl_close($ch);
-            return false;
-        }
-        curl_close($ch);
-        return (strpos($reply, "CHARGING_SUCCESS") !== false);
-    }
 
 
     //function qui envoie les messages aux abonnes :::::::::::::::::::::
@@ -529,20 +423,7 @@ class Fonction extends Request
         return substr($url, 0, strlen($url) - 1);
     }
 
-    function retourneCheckServiceK($listeKeywordService, $content, $champ = null)
-    {
-        $chaine_resultante = preg_replace("#^(" . $listeKeywordService . ")(30|15|7){0,1}$#i", "\${1}_\${2}", $content);
-        if (!empty($chaine_resultante) && $chaine_resultante != null) {
-            $tabo = explode("_", $chaine_resultante);
-
-            $service = $this->retourneServiceK($tabo[0], $champ);
-            if ($service != null) {
-                return $service;
-            }
-        }
-        return null;
-    }
-
+  
     function parseKeyword($content, $listeKeywordService)
     {
         // Nettoyage

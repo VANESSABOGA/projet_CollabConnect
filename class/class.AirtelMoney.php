@@ -53,12 +53,8 @@ class AirtelMoney
     /**
      * Paiement USSD Push
      */
-    public function paymentPush(
-        $telephone,
-        $montant,
-        $reference,
-        $transactionId
-    ) {
+    public function paymentPush22($telephone, $montant, $reference, $transactionId)
+    {
         $token = $this->getAccessToken();
 
         if (!isset($token['access_token'])) {
@@ -90,6 +86,69 @@ class AirtelMoney
             "X-Currency: " . $this->currency
         ];
 
+        $response = $this->request("POST",  $url, $headers, json_encode($payload));
+
+
+        $httpCode = 200;
+        $response = array(
+            "data" => [
+                "transaction" => [
+                    "id" => "A**********N5",
+                    "status" => "SUCCESS"
+                ]
+            ],
+            "status" => [
+                "response_code" => "DP00800001006",
+                "result_code" => "ESB000010",
+                "code" => $httpCode,
+                "success" => true,
+                "message" => "SUCCESS"
+            ]
+        );
+
+
+
+        return json_decode($response, true);
+    }
+
+    public function paymentPush($telephone, $montant, $reference, $transactionId)
+    {
+        $token = $this->getAccessToken();
+
+        if (!isset($token['access_token'])) {
+            return [
+                "success" => false,
+                "error" => "Unable to get access token",
+                "response" => $token
+            ];
+        }
+
+        $url = $this->baseUrl . "/merchant/v1/payments/";
+
+        $payload = [
+            "reference" => $reference,
+            "subscriber" => [
+                "country" => $this->country,
+                "currency" => $this->currency,
+                "msisdn" => $telephone
+            ],
+            "transaction" => [
+                "amount" => $montant,
+                "country" => $this->country,
+                "currency" => $this->currency,
+                "id" => $transactionId
+            ]
+        ];
+
+        $headers = [
+            "Authorization: Bearer " . $token['access_token'],
+            "Content-Type: application/json",
+            "Accept: */*",
+            "X-Country: " . $this->country,
+            "X-Currency: " . $this->currency
+        ];
+
+        // Appel réel API
         $response = $this->request(
             "POST",
             $url,
@@ -97,7 +156,78 @@ class AirtelMoney
             json_encode($payload)
         );
 
-        return json_decode($response, true);
+        /*
+        |--------------------------------------------------------------------------
+        | TEST
+        |--------------------------------------------------------------------------
+        | Décommenter uniquement pour simuler une réponse Airtel.
+        */
+
+
+        $i = rand(1, 10);
+        $response = [
+            "data" => [
+                "transaction" => [
+                    "id" => "A**********N" . $i,
+                    "status" => "TS",
+                    "message" => "Your transaction has been successfully processed"
+                ]
+            ],
+            "status" => [
+                "response_code" => "DP00800001006",
+                "result_code" => "ESB000010",
+                "code" => "200",
+                "success" => true,
+                "message" => "SUCCESS"
+            ]
+        ];
+
+
+        // Si request() retourne une chaîne JSON
+        if (is_string($response)) {
+            $response = json_decode($response, true);
+        }
+
+        // Vérification JSON
+        if (!is_array($response)) {
+            return [
+                "success" => false,
+                "error" => "Invalid API response",
+                "response" => $response
+            ];
+        }
+
+        // Récupération du statut transaction
+        $transactionStatus =
+            $response['data']['transaction']['status'] ?? null;
+
+        $transactionIdResponse =
+            $response['data']['transaction']['id'] ?? null;
+
+        $httpCode =
+            $response['status']['code'] ?? null;
+
+        /*
+    |--------------------------------------------------------------------------
+    | SUCCÈS MÉTIER
+    |--------------------------------------------------------------------------
+    | HTTP 200 seul ne suffit pas.
+    | TS = Transaction Success
+    */
+
+        $success = (
+            $httpCode == 200 &&
+            $transactionStatus === "TS"
+        );
+
+        return [
+            "success" => $success,
+            "http_code" => $httpCode,
+            "transaction_status" => $transactionStatus,
+            "transaction_id" => $transactionIdResponse,
+            "response" => $response,
+            "raw_response" => json_encode($response)
+        ];
     }
 
     /**
@@ -216,28 +346,44 @@ class AirtelMoney
             "raw" => $response
         ];
     }
-    
+
+
     function getTransactionStatusLabel($status)
     {
         switch ($status) {
             case 'TS':
-                return 'Paiement effectue avec succès';
+                $return = 'Paiement effectue avec succès';
+                $etat = 'SUCCESS';
+                break;
 
             case 'TF':
-                return 'Paiement echoue';
-
+                $return =  'Paiement echoue';
+                $etat = 'FAILED';
+                break;
             case 'TIP':
-                return 'Paiement en cours';
-
+                $return =  'Paiement en cours';
+                $etat = 'PENDING';
+                break;
             case 'TA':
-                return 'Paiement ambigu - verification requise';
-
+                $return =  'Paiement ambigu - verification requise';
+                $etat = 'AMBIGUOUS';
+                break;
             case 'TE':
-                return 'Paiement expire';
-
+                $return =  'Paiement expire';
+                $etat = 'EXPIRED';
+                break;
             default:
-                return 'Statut inconnu';
+                $return =  'Statut inconnu';
+                $etat = 'UNKNOWN';
+                break;
         }
+
+
+        return array(
+            "etat" => $etat,
+            "status" => $status,
+            "label" => $return
+        );
     }
 
     function airtelPayment($reference, $msisdn, $amount, $transactionId)
@@ -306,41 +452,71 @@ class AirtelMoney
             ];
         }
 
+
+        // en production
+        // return [
+        //     "success" => ($httpCode == 200),
+        //     "http_code" => $httpCode,
+        //     "response" => json_decode($response, true),
+        //     "raw_response" => $response
+        // ];
+
+        // retour en test de paiement
+
+        $httpCode = 200;
+        $response = [
+            "data" => [
+                "transaction" => [
+                    "airtel_money_id" => "MP260727.1454.C00041",
+                    "id" => "TXN1785160462",
+                    "message" => "Your transaction has been successfully processed",
+                    "status" => "TF"
+                ]
+            ],
+            "status" => [
+                "response_code" => "DP00800001001",
+                "code" => $httpCode,
+                "success" => true,
+                "result_code" => "ESB000010",
+                "message" => "SUCCESS"
+            ]
+        ];
+
+
+
         return [
-            "success" => ($httpCode == 200),
+            "success" => $httpCode == 200,
             "http_code" => $httpCode,
-            "response" => json_decode($response, true),
-            "raw_response" => $response
+            "response" => $response,
+            "raw_response" => json_encode($response)
         ];
     }
-    public function saveTransaction(
-        $reference_facture,
-        $transaction_id,
-        $telephone,
-        $montant,
-        $request
-    ) {
+    public function saveTransaction($reference_facture, $transaction_id, $airtel_money_id, $telephone, $montant, $status, $provider, $request, $response_code = null, $result_code = null)
+    {
 
         $sqlQuery = "INSERT INTO transactions(
-                reference_facture,
-                transaction_id,
-                telephone,
-                montant,
-                raw_request
+                reference_facture, transaction_id,
+                airtel_money_id, telephone,
+                montant, status,
+                response_code,  result_code,
+                message, provider,
+                date_creation
             )
-            VALUES(?,?,?,?,?)";
+            VALUES(?,?,?,?,?,?,?,?,?,?,NOW()) ON DUPLICATE KEY UPDATE date_mise_a_jour=NOW()  ";
+        //SELECT `id`, `reference_facture`, `transaction_id`, `airtel_money_id`, `telephone`, `montant`, `status`, `response_code`, `result_code`, `message`, `provider`, `date_creation`, `date_mise_a_jour` FROM `transactions` WHERE 1
 
-        $insertData = array($reference_facture, $transaction_id, $telephone, $montant, json_encode($request));
+        $insertData = array($reference_facture, $transaction_id, $airtel_money_id, $telephone, $montant, $status, $response_code, $result_code, json_encode($request), $provider);
         $resultat = $this->db->db_executeQuery($sqlQuery, $insertData);
 
-        return array([
-            'reference_facture' => $reference_facture,
-            'transaction_id'    => $transaction_id,
-            'telephone'         => $telephone,
-            'montant'           => $montant,
-            'raw_request'       => json_encode($request),
-            'resultat'            => $resultat
-        ]);
+        // return array([
+        //     'reference_facture' => $reference_facture,
+        //     'transaction_id'    => $transaction_id,
+        //     'telephone'         => $telephone,
+        //     'montant'           => $montant,
+        //     'raw_request'       => json_encode($request),
+        //     'resultat'            => $resultat
+        // ]);
+        return $resultat;
     }
 
     public function updateStatus(

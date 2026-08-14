@@ -143,7 +143,7 @@ class Message
 
 
         $dateResevation = $this->formatDateRDV($dateRDV, $heure);
-        return new EtatLecture(1, $service->description . "Felicitation, votre rendez-vous de {$service->libelle} est pris en compte pour {$dateResevation}, un agent vous contactera bientôt. Merci pour la confiance!", "0. Retour{CR}00. Accueil");
+        return new EtatLecture(1, $service->description . "Felicitation, votre rendez-vous de {$service->libelle} est pris en compte pour {$dateResevation}, un agent vous contactera bientôt. Merci pour la confiance!", "00. Accueil");
     }
 
     public function echecOperation(Service $service = NULL)
@@ -160,6 +160,10 @@ class Message
         return new EtatLecture(1, "Desole ! Votre credit est insuffisant pour effectuer cette operation. Vous devez disposer d'au moins {$service->montant}F", "00. Accueil");
     }
 
+    public static function echecFacturation(Service $service)
+    {
+        return new EtatLecture(1, "Desole ! une erreur s'est produite durant la facturation. Merci de ressayer ou de contacter le service client", "00. Accueil");
+    }
 
     public function auncunFacture(Service $service = NULL)
     {
@@ -173,84 +177,10 @@ class Message
         return new EtatLecture(1, "Desole! tu n'as aucune souscription active au service " . $service->description, "00. Accueil");
     }
 
-    public static function menuAbonne(Service $service)
-    {
-        return new EtatLecture(1, "Cher abonne , recevez l'actualite " . $service->description . " sur ton mobile a " . $service->tarif_consultation . "F la consultation.", "1. Confirmer{CR}2. Se desabonner{CR}0. Retour");
-    }
-
-    public static function menuConsultation(Service $service)
-    {
-        return new EtatLecture(1, "recevez l'actualite " . $service->description . " sur ton mobile a " . $service->tarif_consultation . "F la consultation.", "1. Confirmer{CR}0. Retour");
-    }
-
    
-
-    public function menuNotifUssdRenewOK(Service $service, $libelle)
-    {
-        return new EtatLecture(1, "Ta souscription {$libelle} au service {$service->description} arrive a echeance . Veux tu te reabonner gratuitement?", "1.Oui{CR}2. Non");
-    }
-
-    public function menuAbonnementRenewOK(Service $service, $libelle)
-    {
-        return new EtatLecture(1, "Ton abonnement au service {$service->description} a ete renouvele gratuitement avec succes pour {$libelle}. Plus d'infos sur {$service->shortcode}. {$service->tarif_consultation}F/SMS.", "00. Accueil");
-    }
-
-    public function menuAbonnementRenewNOK(Service $service, $libelle)
-    {
-        return new EtatLecture(1, "Desole ton abonnement au service {$service->description} n a pas aboutir . Plus d'infos sur {$service->shortcode}.", "00. Accueil");
-    }
-
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function menuAbonnementOK(Service $service, $deadline, $renew)
-    {
-        if ($renew == "YES")
-            $libelle = "Avec abonnement automatique";
-        else
-            $libelle = "Sans renouvellement automatique";
-        return new EtatLecture(1, "Ton abonnement au service {$service->description} $libelle  a ete pris en compte. Tu recevras un retour sms sous peu. ", "00. Accueil");
-    }
-    public function menuAbonnementOKSMS(Service $service)
-    {
-        return new EtatLecture(1, "Ton abonnement au service {$service->description} a ete pris en compte. Tu recevras un retour sms sous peu. " . $service->tarif_consultation . "F/SMS", "00. Accueil");
-    }
 
-    public static function desabonnOK(Service $service)
-    {
-        return new EtatLecture(1, "Cher client , ta souscription au service {$service->description} a ete annule avec succes. Pour te reabonner , compose {$service->shortcode} ", "0. Retour");
-    }
-
-    public static function menuConsultationDesabonnALL($serviceName = null)
-    {
-        return new EtatLecture(1, "Cher client , souhaite tu te desabonner au service {$serviceName} ", "1. Confirmer{CR}2. Annuler{CR}0. Retour");
-    }
-
-    public function desabonnOKTout($serviceName = null)
-    {
-
-        return new EtatLecture(1, "Ta souscription au service {$serviceName}  a ete annule avec succes. Pour te reabonner, compose " . $this->shortcode, "00. Accueil");
-    }
-    public static function choixRenew()
-    {
-        $libelle = "Merci de choisir ton type d'abonnement SVP!";
-        return new EtatLecture(1, "$libelle", "1. Abonnement renouvelable{CR}2. Abonnement non renouvelable{CR}0.Retour");
-    }
-
-    public static function abonnementSMS(Service $service)
-    {
-        //return "Vous avez choisi le service {$service->description}." . $service->tarif_consultation . "/SMS\nMerci d'envoyer par sms:\n1 pour une offre " . NISSA::INT_MOIS . "Jours\n2 pour une offre " . NISSA::INT_QUINZAINE . "Jours\n3 pour une offre " . NISSA::INT_SEMAINE . "Jours\n4 pour une Consultation";
-    }
-    
-
-    public static function contenuIndisponible(Service $service)
-    {
-        return new EtatLecture(1, "Desole, il n y a pas de contenus disponibles pour le service " . $service->description . ". Merci de ressayer plus tard. ", "0. Retour");
-    }
-
-   
-
-  
     public function resultatName($nom1, $nom2)
     {
         $lovename = strtolower(preg_replace("/ /", "", strip_tags(trim($nom1 . $nom2))));
@@ -310,7 +240,7 @@ class Message
         return $this->resultatName($nom1, $nom2);
     }
 
-   
+
 
 
     public static function abonnementProlongement()
@@ -319,46 +249,10 @@ class Message
     }
 
 
-
-
-
-
     public function smsWrongMt()
     {
         return "Desole ,  tu as saisi un mot-cle incorrect. Pour vous abonner a TOGOCOM INFOS , compose {$this->shortcode}";
     }
-
-
-    
-    //la lecture d'une consultation par rapport au next et a l'id*************************
-    /*public  function abonneLecture($id, $page)
-    {
-        if ($page < 1) $page = 1;
-        if ($page > Config::PAGE_MAX_CONTENU) $page = Config::PAGE_MAX_CONTENU;
-        $tableauTri = array("where" => "infoId='" . $id . "'", "limit" => "1");
-        $find = "*";
-        $infoBD = $this->NISSA->findRecord($find, $tableauTri, "info");
-        $res = new EtatLecture();
-        $res->id_consultation = $id;
-
-        while (strlen($infoBD["info" . $page]) == 0)
-            $page--;
-
-        $indice = "info" . ($page);
-        $indice2 = "info" . ($page + 1);
-        $res->page = $page;
-        $message = str_replace("\n", " ", $infoBD[$indice]);
-        $message = str_replace("\r\n", " ", $message);
-        $res->title = $message;
-        $res->contenu = "0. Retour";
-        if (isset($infoBD[$indice2]) and strlen($infoBD[$indice2]) > 0) {
-            $res->suivant = true;
-            $res->contenu .= "{CR}9. Suivant";
-        } else {
-            $res->contenu .= "{CR}00. Accueil";
-        }
-        return $res;
-    }*/
 
     public function formatDateRDV($date, $heure = null)
     {

@@ -45,7 +45,7 @@ class MENU extends Fonction
         }
     }*/
 
-    public function setResponse($result, $text, $next = 'menu', $freeFlow = '', $facturation = "YES")
+    public function setResponse($result, $text, $next = 'menu', $freeFlow = 'FC', $facturation = "YES")
     {
         if ($this->canal == "USSD") {
 
@@ -59,15 +59,20 @@ class MENU extends Fonction
                 $text = (string)$text;
             }
 
-            $freeFlow = ($freeFlow === "") ? "FB" : "FC";
+            if (isset($freeFlow) && $freeFlow != "" && $freeFlow != "FB") {
+                $freeFlow = "FC";
+            } else {
+                $freeFlow = "FB";
+            }
 
             header("freeflow: " . $freeFlow);
             header("next: " . $next);
             header("Content-Type: text/plain; charset=ISO-8859-1");
 
-            echo "freeflow: " . $freeFlow . "\n";
-            echo "next: " . $next . "\n";
+            // echo "freeflow: " . $freeFlow . "\n";
+            echo "next:" . $next . "\n";
             echo "ussdstring: " . trim($text);
+
         } else {
             $a_afficher = $text->title_sans_caractere;
             // $this->cdr($a_afficher);
